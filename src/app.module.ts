@@ -2,7 +2,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigService, ConfigModule } from '@nestjs/config';
 import envConfig from '../config/env';
 import { PostsEntity } from './posts/posts.entity';
-import { User } from './user/entities/user.entity';
+import { UserEntity } from './user/entities/user.entity';
+import { AuthEntity } from './auth/entities/auth.entity';
 
 /* 应用程序的根模块 */
 import { Module } from '@nestjs/common';
@@ -10,6 +11,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PostsModule } from './posts/posts.module';
 import { UserModule } from './user/user.module';
+import { AuthModule } from './auth/auth.module';
 
 /* 
   AppModule是应用程序的根模块，根模块提供了用来启动应用的引导机制。
@@ -37,7 +39,7 @@ import { UserModule } from './user/user.module';
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => ({
         type: 'mysql', // 数据库类型
-        entities: [PostsEntity, User], // 数据表实体
+        entities: [PostsEntity, UserEntity, AuthEntity], // 数据表实体
         host: configService.get('DB_HOST', 'localhost'), // 主机，默认为localhost
         port: configService.get<number>('DB_PORT', 3306), // 端口号
         username: configService.get('DB_USER', 'root'), // 用户名
@@ -49,6 +51,7 @@ import { UserModule } from './user/user.module';
     }),
     PostsModule,
     UserModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

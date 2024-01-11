@@ -1,10 +1,10 @@
-import { User } from './entities/user.entity';
+import { UserEntity } from './entities/user.entity';
 import {
   Injectable,
   HttpException,
   HttpStatus,
   UseInterceptors,
-  ClassSerializerInterceptor,
+  ClassSerializerInterceptor
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -13,8 +13,8 @@ import { Repository } from 'typeorm';
 @Injectable()
 export class UserService {
   constructor(
-    @InjectRepository(User)
-    private userRepository: Repository<User>,
+    @InjectRepository(UserEntity)
+    private userRepository: Repository<UserEntity>,
   ) {}
 
   /**
