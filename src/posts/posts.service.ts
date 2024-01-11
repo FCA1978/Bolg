@@ -31,9 +31,11 @@ export class PostsService {
 
   // 获取文章列表
   async findAll(query): Promise<PostsRo> {
-    const qb = await getRepository(PostsEntity).createQueryBuilder('post');
+    //  QueryBuilder允许使用高效便捷的语法构建sql查询，执行并获得自动转换的实体
+    const qb = await this.postsRepository.createQueryBuilder('posts');
+    
     qb.where('1 = 1');
-    qb.orderBy('post.create_time', 'DESC');
+    qb.orderBy('posts.create_time', 'DESC');
 
     const count = await qb.getCount();
     const { pageNum = 1, pageSize = 10, ...params } = query;
@@ -51,7 +53,7 @@ export class PostsService {
 
   // 更新文章
   async updateById(id, post): Promise<PostsEntity> {
-    const existPost = await this.postsRepository.findOne(id);
+    const existPost = await this.postsRepository.findOne({where:{id}});
     if (!existPost) {
       throw new HttpException(`id为${id}的文章不存在`, 401);
     }
@@ -61,7 +63,7 @@ export class PostsService {
 
   // 刪除文章
   async remove(id) {
-    const existPost = await this.postsRepository.findOne(id);
+    const existPost = await this.postsRepository.findOne({where:{id}});
     if (!existPost) {
       throw new HttpException(`id为${id}的文章不存在`, 401);
     }
