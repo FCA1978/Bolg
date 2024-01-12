@@ -5,7 +5,7 @@ import { Column, Entity, PrimaryGeneratedColumn, BeforeInsert } from 'typeorm';
 @Entity('user')
 export class UserEntity {
   @PrimaryGeneratedColumn('uuid')
-  id: number;
+  id: string;
 
   @Column({ length: 100 })
   username: string; //用户名

@@ -6,12 +6,19 @@ import {
   Patch,
   Param,
   Delete,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UserEntity } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UserInfoDto } from './dto/user-info.dto';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { AuthGuard } from '@nestjs/passport';
+import {
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 
 @ApiTags('用户')
 @Controller('user')
@@ -23,5 +30,13 @@ export class UserController {
   @Post('register')
   register(@Body() createUser: CreateUserDto) {
     return this.userService.register(createUser);
+  }
+
+  @ApiOperation({ summary: '获取用户信息' })
+  @ApiBearerAuth() // swagger文档设置token
+  @UseGuards(AuthGuard('jwt'))
+  @Get()
+  getUserInfo(@Req() req) {
+    return req.user;
   }
 }

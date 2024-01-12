@@ -4,7 +4,7 @@ import {
   HttpException,
   HttpStatus,
   UseInterceptors,
-  ClassSerializerInterceptor
+  ClassSerializerInterceptor,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -36,5 +36,9 @@ export class UserService {
 
     const newUser = await this.userRepository.create(createUser);
     return await this.userRepository.save(newUser);
+  }
+
+  async findOne(id: string) {
+    return await this.userRepository.findOneBy({ id: id });
   }
 }
