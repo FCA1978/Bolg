@@ -6,12 +6,12 @@ import { CategoryModule } from './../category/category.module';
 import { TagModule } from './../tag/tag.module';
 
 import { PostsController } from './posts.controller';
-import { PostsService } from './posts.service';
 
 import { PostsEntity } from './posts.entity';
 import { CategoryEntity } from './../category/entities/category.entity';
 import { TagEntity } from './../tag/entities/tag.entity';
 
+import { PostsService } from './posts.service';
 import { CategoryService } from './../category/category.service';
 import { TagService } from './../tag/tag.service';
 
