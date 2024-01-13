@@ -1,6 +1,7 @@
 import { UserEntity } from 'src/user/entities/user.entity';
 import { CategoryEntity } from 'src/category/entities/category.entity';
 import { TagEntity } from 'src/tag/entities/tag.entity';
+
 import { Exclude, Expose } from 'class-transformer';
 import {
   Column,
@@ -11,6 +12,7 @@ import {
   ManyToMany,
   JoinTable,
 } from 'typeorm';
+import { PostInfoDto } from './dto/create-posts.dto';
 
 // 文章实体
 @Entity('posts')
@@ -84,4 +86,22 @@ export class PostsEntity {
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   update_time: Date;
+
+  toResponseObject(): PostInfoDto {
+    let responseObj: PostInfoDto = {
+      ...this,
+      isRecommend: this.isRecommend ? true : false,
+    };
+    if (this.category) {
+      responseObj.category = this.category.name;
+    }
+    if (this.tags && this.tags.length) {
+      responseObj.tags = this.tags.map((item) => item.name);
+    }
+    if (this.author && this.author.id) {
+      responseObj.userId = this.author.id;
+      responseObj.author = this.author.nickname || this.author.username;
+    }
+    return responseObj;
+  }
 }

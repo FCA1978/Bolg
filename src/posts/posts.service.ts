@@ -2,6 +2,9 @@ import { HttpException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { PostsEntity } from './posts.entity';
+import { CategoryService } from './../category/category.service';
+import { TagService } from './../tag/tag.service';
+import { CreatePostDto } from './dto/create-posts.dto';
 
 export interface PostsRo {
   list: PostsEntity[];
@@ -13,11 +16,13 @@ export class PostsService {
   constructor(
     @InjectRepository(PostsEntity)
     private readonly postsRepository: Repository<PostsEntity>,
+    private readonly categoryService: CategoryService,
+    private readonly tagService: TagService,
   ) {}
 
   // 创建文章
   // Partial是ts中的一个内置类型，它可以将一个对象的所有属性转换成可选的。
-  async create(post: Partial<PostsEntity>): Promise<PostsEntity> {
+  async create(user, post: CreatePostDto ): Promise<number> {
     const { title } = post;
     if (!title) {
       throw new HttpException('缺少文章标题', 401);
@@ -26,7 +31,34 @@ export class PostsService {
     if (doc) {
       throw new HttpException('文章已存在', 401);
     }
-    return await this.postsRepository.save(post);
+
+    let { tag, category = 0, status, isRecommend, coverUrl } = post;
+
+    const categoryDoc = await this.categoryService.findById(category);
+
+    // 根据传入的标签id，如 ‘1,2’,获取标签
+    const tags = await this.tagService.findByIds(('' + tag).split(','));
+    const postParam: Partial<PostsEntity> = {
+      ...post,
+      isRecommend: isRecommend ? 1 : 0,
+      category: categoryDoc,
+      tags: tags,
+      author: user,
+    };
+
+    // 判断状态，为publish则设置发布时间
+    if (status === 'publish') {
+      Object.assign(postParam, {
+        publishTime: new Date(),
+      });
+    }
+
+    const newPost: PostsEntity = await this.postsRepository.create({
+      ...postParam,
+    });
+
+    const created = await this.postsRepository.save(newPost);
+    return created.id;
   }
 
   // 获取文章列表

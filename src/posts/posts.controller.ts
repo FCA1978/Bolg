@@ -1,5 +1,5 @@
 import { PostsService, PostsRo } from './posts.service';
-import { ApiTags, ApiOperation } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import {
   Body,
   Controller,
@@ -9,8 +9,12 @@ import {
   Post,
   Put,
   Query,
+  UseGuards,
+  Req,
 } from '@nestjs/common';
 import { CreatePostDto } from './dto/create-posts.dto';
+import { AuthGuard } from '@nestjs/passport';
+import { RolesGuard, Roles } from './../auth/role.guard';
 
 @ApiTags('文章')
 @Controller('posts')
@@ -22,10 +26,13 @@ export class PostsController {
    * @param  post
    */
   @ApiOperation({ summary: '创建文章' })
+  @ApiBearerAuth()
   @Post()
+  @Roles('admin', 'root')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   // CreatePostDto 是在对创建文章的接口传入的参数进行类型说明
-  async create(@Body() post:CreatePostDto) {
-    return await this.postsService.create(post);
+  async create(@Body() post: CreatePostDto, @Req() req) {
+    return await this.postsService.create(post, req.user);
   }
 
   /**
