@@ -1,4 +1,4 @@
-import { HttpException, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { PostsEntity } from './posts.entity';
@@ -22,7 +22,7 @@ export class PostsService {
 
   // 创建文章
   // Partial是ts中的一个内置类型，它可以将一个对象的所有属性转换成可选的。
-  async create(user, post: CreatePostDto ): Promise<number> {
+  async create(user, post: CreatePostDto): Promise<number> {
     const { title } = post;
     if (!title) {
       throw new HttpException('缺少文章标题', 401);
@@ -79,8 +79,21 @@ export class PostsService {
   }
 
   // 获取指定文章
-  async findById(id): Promise<PostsEntity> {
-    return await this.postsRepository.findOne({ where: { id } });
+  async findById(id): Promise<any> {
+    const qb = this.postsRepository
+      .createQueryBuilder('post')
+      .leftJoinAndSelect('post.category', 'category')
+      .leftJoinAndSelect('post.tag', 'tag')
+      .leftJoinAndSelect('post.author', 'user')
+      .where('post.id = :id')
+      .setParameter('id', id);
+
+    const result = await qb.getOne();
+    if (!result)
+      throw new HttpException(`id为${id}的文章不存在`, HttpStatus.BAD_REQUEST);
+    await this.postsRepository.update(id, { count: result.count + 1 });
+
+    await result.toResponseObject();
   }
 
   // 更新文章
